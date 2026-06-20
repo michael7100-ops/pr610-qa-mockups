@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personalized upgrade page — slide for Jeson</title>
+<style>
+  :root{
+    --fo-green:#5b8a2b; --fo-green-d:#456a1f; --fo-gold:#e8a33d;
+    --ink:#2b2b25; --mut:#7c7a70; --line:#e3e0d4; --paper:#f7f5ee; --ios:#0a84ff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#3a2e1c;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .slide{width:1280px;height:720px;margin:24px auto;background:#f5f3ea;position:relative;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.4);color:var(--ink)}
+  .head{background:var(--fo-green-d);color:#fff;padding:18px 40px}
+  .head h1{margin:0;font-size:27px;font-weight:800}
+  .head p{margin:4px 0 0;font-size:14px;opacity:.9}
+  .body{display:grid;grid-template-columns:640px 1fr;height:calc(720px - 76px)}
+  .left{display:flex;gap:22px;align-items:flex-start;justify-content:center;padding:26px 14px}
+  .right{padding:30px 40px 20px 26px}
+
+  .device{width:286px}
+  .device .cap{text-align:center;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
+  .phone{background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.28);border:5px solid #20300f}
+  .ph-bar{background:var(--fo-green-d);color:#fff;font-size:11px;padding:5px 14px;display:flex;justify-content:space-between}
+  .ph-bar.ios{background:#111}
+
+  .rcpt{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--line);background:var(--paper)}
+  .ava{width:54px;height:54px;border-radius:50%;flex:0 0 54px;background:linear-gradient(135deg,#9cc06a,#6c9a3a);position:relative;overflow:hidden;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .ava svg{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:46px;height:46px;fill:#3f5e20;opacity:.85}
+  .who b{font-size:14px}.who span{display:block;font-size:11.5px;color:var(--mut)}
+
+  .msgpill{margin:10px 13px 2px;border:1.5px dashed var(--fo-green);border-radius:12px;background:#fbfdf6;padding:9px 12px;font-size:12.5px;color:var(--ink);line-height:1.36}
+  .sendhdr{font-size:13.5px;font-weight:700;text-align:center;margin:9px 13px 8px}
+  .sendhdr .nm{color:var(--fo-green-d)}
+
+  .tiles{padding:0 13px 6px;display:flex;flex-direction:column;gap:8px}
+  .tile{display:flex;align-items:center;gap:9px;border:1.5px solid var(--line);border-radius:12px;padding:10px 11px;background:#fff;position:relative}
+  .tile.best{border-color:var(--fo-green);background:#f4faea;box-shadow:0 2px 0 var(--fo-green-d)}
+  .tile .mid{flex:1}
+  .tile .term{font-weight:800;font-size:14px}
+  .tile .save{display:inline-block;font-size:9.5px;background:var(--fo-gold);color:#3a2a06;border-radius:10px;padding:1px 7px;font-weight:700;margin-top:3px}
+  .tile .price{text-align:right;font-weight:800;color:var(--fo-green-d);font-size:14px;line-height:1.1}
+  .tile .price small{display:block;font-weight:500;color:var(--mut);font-size:10px}
+  .iostotal{font-size:15px}
+  .tile.iost{border-color:#dcdce2}.tile.iost.best{border-color:var(--ios);background:#eef6ff;box-shadow:0 2px 0 #0860c4}
+  .tile.iost .price{color:#0860c4}
+  /* send affordance = FO conversation send icon (paper plane) */
+  .send{flex:0 0 auto;background:var(--fo-green);border:1px solid var(--fo-green-d);border-radius:8px;
+    padding:8px 11px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 1px rgba(0,0,0,.12)}
+  .tile.best .send{background:var(--fo-green-d)}
+  .send svg{width:16px;height:16px;fill:#fff;display:block}
+  .tilefoot{text-align:center;font-size:10.5px;color:var(--mut);margin:5px 13px 11px}
+  .benefits{padding:8px 15px 13px;border-top:1px solid var(--line);background:var(--paper)}
+  .benefits h4{margin:3px 0 5px;font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+  .benefits div{font-size:11.5px;color:#4a4a40;padding:1px 0}
+  .benefits .ok{color:var(--fo-green);font-weight:800;margin-right:6px}
+
+  .right h2{font-size:23px;margin:0 0 16px;color:var(--fo-green-d);font-weight:800}
+  .pts{list-style:none;margin:0;padding:0}
+  .pts li{display:flex;gap:13px;margin-bottom:17px}
+  .pts .n{flex:0 0 28px;width:28px;height:28px;border-radius:50%;background:var(--fo-green);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px;margin-top:1px}
+  .pts .t b{font-size:15.5px;display:block;color:var(--ink);margin-bottom:1px}
+  .pts .t span{font-size:13px;color:#5a5440;line-height:1.42}
+  .pin{display:inline-flex;width:19px;height:19px;border-radius:5px;background:var(--fo-green);vertical-align:-4px;align-items:center;justify-content:center;margin:0 2px}
+  .pin svg{width:11px;height:11px;fill:#fff}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="head">
+    <h1>Personalized upgrade page</h1>
+    <p>When a free member tries to message someone, the upgrade page becomes about <i>that person and sending them a message</i> — not a generic paywall.</p>
+  </div>
+
+  <div class="body">
+    <div class="left">
+
+      <!-- WEB (C) -->
+      <div class="device">
+        <div class="cap">Web</div>
+        <div class="phone">
+          <div class="ph-bar"><span>FarmersOnly</span><span>9:41</span></div>
+          <div>
+            <div class="rcpt">
+              <div class="ava"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6z"/></svg></div>
+              <div class="who"><b>Send Olivia your message</b><span>29 · Bozeman, MT</span></div>
+            </div>
+            <div class="msgpill">"Hey Olivia! Saw you're into trail riding too — what's your favorite spot around Bozeman?"</div>
+            <div class="sendhdr">Choose a plan &amp; <span class="nm">your message sends</span></div>
+            <div class="tiles">
+              <div class="tile best">
+                <div class="mid"><div class="term">6 Months</div><span class="save">Best deal · save 45%</span></div>
+                <div class="price">$16.66<small>/mo · billed $99.99</small></div>
+                <div class="send"><svg viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg></div>
+              </div>
+              <div class="tile">
+                <div class="mid"><div class="term">3 Months</div></div>
+                <div class="price">$20.00<small>/mo · billed $59.99</small></div>
+                <div class="send"><svg viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg></div>
+              </div>
+              <div class="tile">
+                <div class="mid"><div class="term">1 Month</div></div>
+                <div class="price">$29.95<small>/mo</small></div>
+                <div class="send"><svg viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg></div>
+              </div>
+            </div>
+            <div class="tilefoot">cancel anytime · 🔒 secure checkout</div>
+            <div class="benefits">
+              <h4>Every plan includes</h4>
+              <div><span class="ok">✓</span>Unlimited messages</div>
+              <div><span class="ok">✓</span>See status &amp; last visit</div>
+              <div><span class="ok">✓</span>Unlimited photos + all premium features</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- iOS -->
+      <div class="device">
+        <div class="cap">iOS / App Store</div>
+        <div class="phone">
+          <div class="ph-bar ios"><span>← Olivia, 29</span><span>9:41</span></div>
+          <div>
+            <div class="rcpt">
+              <div class="ava"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6z"/></svg></div>
+              <div class="who"><b>Olivia, 29</b><span>Bozeman, MT</span></div>
+            </div>
+            <div class="msgpill">"Hey Olivia! Saw you're into trail riding too — what's your favorite spot around Bozeman?"</div>
+            <div class="sendhdr">Membership sends your message to <span class="nm" style="color:#0860c4">Olivia</span></div>
+            <div class="tiles">
+              <div class="tile iost best">
+                <div class="mid"><div class="term">6 Months</div><span class="save" style="background:#0860c4;color:#fff">Best deal</span></div>
+                <div class="price"><span class="iostotal">$99.99</span><small>$16.66/mo</small></div>
+                <div class="send"><svg viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg></div>
+              </div>
+              <div class="tile iost">
+                <div class="mid"><div class="term">3 Months</div></div>
+                <div class="price"><span class="iostotal">$59.99</span><small>$20.00/mo</small></div>
+                <div class="send"><svg viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg></div>
+              </div>
+              <div class="tile iost">
+                <div class="mid"><div class="term">1 Month</div></div>
+                <div class="price"><span class="iostotal">$29.95</span><small>/mo</small></div>
+                <div class="send"><svg viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg></div>
+              </div>
+            </div>
+            <div class="tilefoot">Auto-renews · cancel anytime</div>
+            <div class="benefits">
+              <h4>Every plan includes</h4>
+              <div><span class="ok">✓</span>Unlimited messages</div>
+              <div><span class="ok">✓</span>See status &amp; last visit</div>
+              <div><span class="ok">✓</span>Unlimited photos + all premium features</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="right">
+      <h2>What we're doing &amp; why</h2>
+      <ol class="pts">
+        <li><span class="n">1</span><span class="t"><b>Lead with the person</b><span>The member they were trying to reach is at the top — name, age, city, photo. The page is about <i>this person</i>, so upgrading feels concrete instead of like a generic paywall.</span></span></li>
+        <li><span class="n">2</span><span class="t"><b>All three terms, one tap each</b><span>1 / 3 / 6-month plans are all on the page — no drill-down to pick a term (and the App Store requires every plan shown). Each row is a single tap.</span></span></li>
+        <li><span class="n">3</span><span class="t"><b>Paying <i>is</i> sending</b><span>The header says it once — "your message sends" — and each plan's button is our send icon <span class="pin"><svg viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg></span> — the same one used to send a message. One tap = upgrade <b>and</b> the message goes out.</span></span></li>
+        <li><span class="n">4</span><span class="t"><b>iOS follows Apple's rules</b><span>Tiles map to App-Store products; the total price leads with the per-month underneath. Same layout and logic as web.</span></span></li>
+      </ol>
+    </div>
+  </div>
+</div>
+</body>
+</html>
