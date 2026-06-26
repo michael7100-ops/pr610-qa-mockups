@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" class="fo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flirt sheet — B-minimal &amp; Farmhand-ready host (#704 / #660)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  .fo{
+    --green:#1d7138; --green-hover:#15803d; --border:#509a42; --soft:#eff5f1; --gold:#b8860b;
+  }
+  body{ background:#eef1f0; color:#111; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; margin:0; }
+  .wrap{ max-width:1320px; margin:0 auto; padding:20px 16px 60px; }
+  h1{ font-size:20px; font-weight:800; margin:0 0 4px; }
+  .sub{ color:#475569; font-size:13px; margin-bottom:18px; }
+
+  /* phone frame */
+  .frames{ display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start; }
+  .col{ width:330px; }
+  .col h2{ font-size:14px; font-weight:800; margin:0 0 2px; }
+  .col .tag{ font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:999px; display:inline-block; margin-bottom:8px; }
+  .tag.bad{ background:#fee2e2; color:#b91c1c; }
+  .tag.ok{ background:#dcfce7; color:#166534; }
+  .tag.ref{ background:#e2e8f0; color:#334155; }
+  .phone{
+    width:330px; height:660px; background:#cdd5d2; border-radius:30px; padding:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,.18); position:relative; overflow:hidden;
+  }
+  .screen{ position:absolute; inset:10px; border-radius:22px; overflow:hidden; background:#f6f7f6; }
+  /* faux page behind the sheet */
+  .page{ position:absolute; inset:0; background:linear-gradient(#f6f7f6,#e9efe a); }
+  .page-photo{ position:absolute; inset:0; background-size:cover; background-position:center top; filter:saturate(.95); }
+  .scrim{ position:absolute; inset:0; background:rgba(0,0,0,.38); }
+
+  /* ---- legacy centered modal (A) ---- */
+  .modal{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:86%; background:#fff;
+    border-radius:14px; padding:16px; box-shadow:0 12px 40px rgba(0,0,0,.3); max-height:78%; display:flex; flex-direction:column; }
+  .modal .list{ overflow-y:auto; }
+
+  /* ---- bottom sheet ---- */
+  .sheet{ position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:18px 18px 0 0;
+    box-shadow:0 -8px 30px rgba(0,0,0,.22); display:flex; flex-direction:column; }
+  .sheet.tall{ height:88%; }
+  .sheet.cramped{ height:58%; transform:translateY(-66px); border-radius:18px; } /* the shipped quirk */
+  .handle{ width:38px; height:4px; background:#cbd5e1; border-radius:999px; margin:8px auto 4px; }
+  .sheet .body{ overflow-y:auto; padding:6px 14px 16px; }
+
+  .x{ position:absolute; top:8px; right:8px; width:28px; height:28px; border-radius:999px; background:#fff;
+    box-shadow:0 1px 4px rgba(0,0,0,.2); display:flex; align-items:center; justify-content:center; color:#64748b; font-size:16px; border:none; cursor:pointer; }
+
+  /* recipient context row */
+  .recip{ display:flex; align-items:center; gap:10px; padding:4px 2px 2px; }
+  .recip img{ width:42px; height:42px; border-radius:999px; object-fit:cover; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.15); }
+  .recip .nm{ font-weight:700; font-size:15px; line-height:1.1; }
+  .recip .meta{ font-size:12px; color:#64748b; }
+
+  .ceremony{ text-align:center; font-size:18px; font-weight:800; margin:6px 0 10px; }
+
+  /* classic flirt bars */
+  .flirt{ display:block; background:var(--green); color:#fff; border-radius:9px; padding:11px 13px; font-size:14px;
+    font-weight:600; margin-bottom:9px; text-decoration:none; cursor:pointer; }
+  .flirt:hover{ background:var(--green-hover); }
+  .flirt .arrow{ float:right; opacity:.8; }
+
+  /* "more" controls */
+  .more-refresh{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; background:var(--green);
+    color:#fff; border:none; border-radius:9px; padding:11px; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:9px; }
+  .more-chev{ display:flex; align-items:center; justify-content:center; gap:6px; width:100%; background:#fff;
+    color:var(--green); border:1.5px solid var(--border); border-radius:9px; padding:10px; font-size:14px; font-weight:700; cursor:pointer; margin:2px 0 8px; }
+
+  .close-btn{ display:flex; align-items:center; gap:6px; background:var(--green); color:#fff; border:none;
+    border-radius:999px; padding:8px 14px; font-size:14px; margin:10px auto 2px; cursor:pointer; }
+
+  /* ---- Farmhand hero tile ---- */
+  .hero{ border:1.5px solid var(--border); background:var(--soft); border-radius:14px; padding:12px; margin:6px 0 12px; position:relative; }
+  .hero .chip{ display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--border);
+    color:var(--green); font-size:11.5px; font-weight:800; padding:3px 9px; border-radius:999px; }
+  .hero .opener{ font-size:15.5px; line-height:1.35; color:#0f172a; margin:9px 2px 12px; }
+  .hero .send{ display:flex; align-items:center; justify-content:center; gap:8px; background:var(--green); color:#fff;
+    border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:800; width:100%; cursor:pointer; }
+  .hero .send .arrow{ font-size:17px; }
+  .hero-actions{ display:flex; align-items:center; justify-content:space-between; margin-top:9px; }
+  .tryagain{ display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--green);
+    font-size:13px; font-weight:700; cursor:pointer; }
+  .tryagain[disabled]{ color:#94a3b8; cursor:default; }
+  .retrynote{ font-size:11px; color:#94a3b8; }
+  .optout{ display:block; text-align:center; color:#64748b; font-size:13px; font-weight:600; text-decoration:underline;
+    background:none; border:none; width:100%; cursor:pointer; padding:6px; }
+
+  /* shimmer */
+  .shim{ height:14px; border-radius:6px; margin:8px 2px; background:linear-gradient(90deg,#e7ece9 25%,#f3f6f4 37%,#e7ece9 63%);
+    background-size:400% 100%; animation:sh 1.3s ease infinite; }
+  @keyframes sh{ 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+  .w90{ width:90% } .w70{ width:70% } .w40{ width:40% }
+
+  /* annotation flags */
+  .flag{ display:flex; gap:8px; align-items:flex-start; font-size:12px; margin:7px 0; }
+  .flag .n{ flex:0 0 18px; height:18px; border-radius:999px; background:#b91c1c; color:#fff; font-weight:800;
+    font-size:11px; display:flex; align-items:center; justify-content:center; }
+  .flag.good .n{ background:#166534; }
+  .notes{ width:300px; }
+  .notes h3{ font-size:13px; font-weight:800; margin:0 0 4px; }
+  .collapsed{ display:none; }
+
+  .switch{ margin:6px 0 14px; display:flex; gap:6px; flex-wrap:wrap; }
+  .switch button{ font-size:12px; padding:5px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; }
+  .switch button.on{ background:var(--green); color:#fff; border-color:var(--green); }
+  .legend{ font-size:12px; color:#475569; max-width:760px; line-height:1.5; margin-top:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Flirt sheet — the −20% version, the B-minimal fix, &amp; the same shell hosting Farmhand</h1>
+  <div class="sub">#704 (Phase 1a sheet) &amp; #660 (Phase 1b Farmhand). Mobile, Standard sender. The point: <b>one shell</b> that is guardrail-neutral on flirts-sent in 1a <b>and</b> drops the Farmhand tile in for 1b with zero re-architecture.</div>
+
+  <div class="frames">
+
+    <!-- A · LEGACY -->
+    <div class="col">
+      <h2>A · Legacy modal <span class="tag ref">baseline</span></h2>
+      <div class="phone"><div class="screen">
+        <div class="page-photo" style="background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=700&q=60')"></div>
+        <div class="scrim"></div>
+        <div class="modal">
+          <div class="list">
+            <a class="flirt">Howdy! 🤠 <span class="arrow">→</span></a>
+            <a class="flirt">You caught my eye today <span class="arrow">→</span></a>
+            <a class="flirt">Coffee or sweet tea? <span class="arrow">→</span></a>
+            <a class="flirt">Your smile could light up a barn 😊 <span class="arrow">→</span></a>
+            <a class="flirt">Favorite thing about country life? <span class="arrow">→</span></a>
+            <a class="flirt">Hi! Would love to get to know you <span class="arrow">→</span></a>
+            <a class="flirt">You seem like trouble — the good kind <span class="arrow">→</span></a>
+            <a class="flirt">Two left feet but I'd still dance <span class="arrow">→</span></a>
+            <a class="flirt">Is it hot or is it this farm? <span class="arrow">→</span></a>
+            <a class="flirt">Hope your day's going great! <span class="arrow">→</span></a>
+          </div>
+          <button class="close-btn">✕ Close</button>
+        </div>
+      </div></div>
+      <div class="legend"><b>Whole list, one scan, one tap.</b> No title, no recipient ceremony. This is the volume baseline B has to beat (or at least match).</div>
+    </div>
+
+    <!-- B · AS SHIPPED -->
+    <div class="col">
+      <h2>B · As shipped <span class="tag bad">−20% sent</span></h2>
+      <div class="phone"><div class="screen">
+        <div class="page-photo" style="background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=700&q=60')"></div>
+        <div class="scrim"></div>
+        <div class="sheet cramped">
+          <button class="x">✕</button>
+          <div class="handle"></div>
+          <div class="body">
+            <div class="ceremony">Send Olivia a flirt!</div>
+            <a class="flirt">Howdy! 🤠 <span class="arrow">→</span></a>
+            <a class="flirt">You caught my eye today <span class="arrow">→</span></a>
+            <a class="flirt">Coffee or sweet tea? <span class="arrow">→</span></a>
+            <a class="flirt">Your smile could light up a barn 😊 <span class="arrow">→</span></a>
+            <a class="flirt">Favorite thing about country life? <span class="arrow">→</span></a>
+            <button class="more-refresh"><span style="font-size:15px">↻</span> More Flirt Options</button>
+          </div>
+        </div>
+      </div></div>
+      <div class="notes" style="width:330px">
+        <div class="flag"><span class="n">1</span><div><b>Only 5 of ~52</b> shown; the rest hidden behind a <b>refresh (↻) icon</b> that reads as "shuffle these 5," not "see the other 47."</div></div>
+        <div class="flag"><span class="n">2</span><div><b>Cramped &amp; yanked up</b> (max-h 60vh, −90px) for non-gold — the measured population gets the <i>smallest</i> sheet; rows clip / need in-sheet scroll.</div></div>
+        <div class="flag"><span class="n">3</span><div><b>Ceremony header</b> names the target → reframes a casual wink as a deliberate act, adding hesitation.</div></div>
+      </div>
+    </div>
+
+    <!-- B-minimal · Phase 1a -->
+    <div class="col">
+      <h2>B-minimal · Phase 1a <span class="tag ok">the fix</span></h2>
+      <div class="phone"><div class="screen">
+        <div class="page-photo" style="background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=700&q=60')"></div>
+        <div class="scrim"></div>
+        <div class="sheet tall">
+          <button class="x">✕</button>
+          <div class="handle"></div>
+          <div class="body">
+            <div class="recip">
+              <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&q=60" alt="">
+              <div><div class="nm">Olivia</div><div class="meta">29 · Bozeman, MT</div></div>
+            </div>
+            <!-- reserved hero slot (empty in 1a) -->
+            <div style="border:1.5px dashed #cbd5e1; border-radius:12px; padding:8px; text-align:center; color:#94a3b8; font-size:11.5px; margin:8px 0 10px;">
+              ⌂ Farmhand tile mounts here in Phase 1b
+            </div>
+            <a class="flirt">Howdy! 🤠 <span class="arrow">→</span></a>
+            <a class="flirt">You caught my eye today <span class="arrow">→</span></a>
+            <a class="flirt">Coffee or sweet tea? <span class="arrow">→</span></a>
+            <a class="flirt">Your smile could light up a barn 😊 <span class="arrow">→</span></a>
+            <a class="flirt">Favorite thing about country life? <span class="arrow">→</span></a>
+            <a class="flirt">Hi! Would love to get to know you <span class="arrow">→</span></a>
+            <a class="flirt">You seem like trouble — the good kind <span class="arrow">→</span></a>
+            <a class="flirt">Is it hot or is it this farm? <span class="arrow">→</span></a>
+          </div>
+        </div>
+      </div></div>
+      <div class="notes" style="width:330px">
+        <div class="flag good"><span class="n">✓</span><div><b>Full list restored</b>, scrolls inside a comfortable <b>88vh</b> bottom-anchored sheet — rows in the thumb zone, none clipped.</div></div>
+        <div class="flag good"><span class="n">✓</span><div><b>Recipient context is light</b> (small avatar row), not a stakes-raising H2 — but it's <i>present</i>, which sets up 1b.</div></div>
+        <div class="flag good"><span class="n">✓</span><div><b>Refresh icon retired</b> here (no truncation to need it) — reserved for Farmhand "Try again."</div></div>
+      </div>
+    </div>
+
+    <!-- B-minimal · Phase 1b Farmhand -->
+    <div class="col">
+      <h2>B-minimal · Phase 1b <span class="tag ok">Farmhand-ready</span></h2>
+      <div class="switch">
+        <button id="b-ready" class="on" onclick="fhState('ready')">Ready</button>
+        <button id="b-load" onclick="fhState('loading')">Generating…</button>
+      </div>
+      <div class="phone"><div class="screen">
+        <div class="page-photo" style="background-image:url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=700&q=60')"></div>
+        <div class="scrim"></div>
+        <div class="sheet tall">
+          <button class="x">✕</button>
+          <div class="handle"></div>
+          <div class="body">
+            <div class="recip">
+              <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&q=60" alt="">
+              <div><div class="nm">Olivia</div><div class="meta">29 · Bozeman, MT</div></div>
+            </div>
+
+            <!-- HERO: ready -->
+            <div class="hero" id="hero-ready">
+              <span class="chip">⌂ Farmhand suggests</span>
+              <div class="opener">"Saw you're into trail riding too — what's your favorite spot around Bozeman?"</div>
+              <button class="send">Tap to send <span class="arrow">→</span></button>
+              <div class="hero-actions">
+                <button class="tryagain">↻ Try again</button>
+                <span class="retrynote">1 try left</span>
+              </div>
+            </div>
+
+            <!-- HERO: loading -->
+            <div class="hero collapsed" id="hero-loading">
+              <span class="chip">⌂ Farmhand is writing…</span>
+              <div class="shim w90"></div><div class="shim w70"></div><div class="shim w40"></div>
+              <button class="send" style="opacity:.55" disabled>Tap to send <span class="arrow">→</span></button>
+              <div class="hero-actions">
+                <button class="tryagain" disabled>↻ Try again</button>
+                <span class="retrynote">writing…</span>
+              </div>
+            </div>
+
+            <button class="optout" onclick="toggleClassic()">No thanks — show classic flirts</button>
+            <div id="classic" class="collapsed">
+              <a class="flirt">Howdy! 🤠 <span class="arrow">→</span></a>
+              <a class="flirt">You caught my eye today <span class="arrow">→</span></a>
+              <a class="flirt">Coffee or sweet tea? <span class="arrow">→</span></a>
+              <a class="flirt">Favorite thing about country life? <span class="arrow">→</span></a>
+              <a class="flirt">Hi! Would love to get to know you <span class="arrow">→</span></a>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <div class="notes" style="width:330px">
+        <div class="flag good"><span class="n">✓</span><div><b>Same shell.</b> Recipient row now <i>earns</i> its place — Farmhand wrote this <i>for her</i>. Hero fills the slot 1a reserved.</div></div>
+        <div class="flag good"><span class="n">✓</span><div><b>↻ = Try again</b> (regenerate, 1 retry) — the icon finally means what it looks like.</div></div>
+        <div class="flag good"><span class="n">✓</span><div><b>Classic list demoted</b> to a labeled opt-out, not silently truncated. Tap "show classic flirts" to expand.</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend" style="margin-top:26px; max-width:980px;">
+    <b>Consistency check — does B-minimal serve the Farmhand goal?</b> Yes, and it's <i>more</i> aligned than the shipped B. Three of the shipped sheet's friction points only made sense as half-built Farmhand scaffolding: the recipient header (pointless ceremony for canned flirts, but the <i>justification</i> for an AI opener), the truncated list (harmful in 1a, but the right instinct that the classic list should be the fallback in 1b), and the refresh icon (wrong for "more options," right for "regenerate"). B-minimal resolves each by <b>tier</b>: in 1a the recipient row stays light, the list is full, and ↻ is retired; in 1b the recipient row becomes meaningful, the list collapses to a labeled opt-out, and ↻ becomes Try-again. One shell, two configurations, no rebuild between phases.
+  </div>
+</div>
+
+<script>
+  function fhState(s){
+    document.getElementById('hero-ready').classList.toggle('collapsed', s!=='ready');
+    document.getElementById('hero-loading').classList.toggle('collapsed', s!=='loading');
+    document.getElementById('b-ready').classList.toggle('on', s==='ready');
+    document.getElementById('b-load').classList.toggle('on', s==='loading');
+  }
+  function toggleClassic(){ document.getElementById('classic').classList.toggle('collapsed'); }
+</script>
+</body>
+</html>
