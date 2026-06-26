@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" class="fo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FarmersOnly — #608 upgrade page, composer-first (message intent)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { important:true, theme:{ extend:{ colors:{
+    primary:{ light:'var(--primary-light)', dark:'var(--primary-dark)', fill:'var(--primary-fill)',
+      background:'var(--primary-background)', border:'var(--primary-border)', text:'var(--primary-text)',
+      hover:'var(--primary-hover)', premium:'var(--primary-premium)', counter:'var(--primary-counter)' },
+    secondary:{ background:'var(--secondary-background)' } } } } }
+</script>
+<style>
+  .fo{
+    --primary-light:#fff; --primary-dark:#000; --primary-fill:#1d7138; --primary-background:#1d7138;
+    --primary-border:#509a42; --primary-text:#1d7138; --secondary-background:#eff5f1;
+    --primary-hover:#15803d; --primary-premium:#0052cc; --primary-counter:#dc2626;
+  }
+  body{ background:#fff; color:#111; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+  @media (max-width:920px){ .pc-only{ display:none !important; } }
+  @media (min-width:920px){ .mobile-only{ display:none !important; } }
+  .bg-m1{ background:#983334; } .bg-m6{ background:#10b981; } .bg-m3{ background:#fdba74; }
+  .border-m1{ border-color:#991b1b; } .border-m6{ border-color:#10b981; } .border-m3{ border-color:#fdba74; }
+  .popup-animate{ transition:transform .2s, box-shadow .2s; cursor:pointer; }
+  .popup-animate:hover{ transform:scale(1.06) translateY(-8px); box-shadow:0 8px 32px rgba(0,0,0,.18); z-index:2; }
+
+  .recipient-block{ border:1px solid var(--primary-border); background:var(--secondary-background); }
+
+  /* === composer — same controls as the live messaging UI, but ONE LINE deep === */
+  .compose-row{ display:flex; align-items:center; gap:8px; }
+  .compose-shell{ flex:1; border:1px solid var(--primary-border); border-radius:9999px; background:#fff; display:flex; align-items:center; }
+  .compose-box{ width:100%; resize:none; padding:9px 14px; font-size:15px; line-height:1.3; color:#111;
+    border:none; outline:none; height:40px; max-height:40px; background:transparent;
+    white-space:nowrap; overflow-x:auto; overflow-y:hidden; }
+  .compose-box::placeholder{ color:#9ca3af; }
+  .emoji-btn{ font-size:23px; color:var(--primary-text); background:none; border:none; cursor:pointer; line-height:1; }
+  /* the SAME round green send button as messaging (bg-primary-background, rounded-full, send glyph) */
+  .send-btn{ flex:0 0 auto; display:flex; align-items:center; justify-content:center; background:var(--primary-background);
+    color:#fff; border:none; border-radius:9999px; width:42px; height:42px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.18); }
+  .send-btn.muted{ opacity:.45; }
+  .send-btn:not(.muted):hover{ background:var(--primary-hover); }
+  .meta-row{ display:flex; justify-content:space-between; align-items:center; margin-top:5px; }
+  .charcount{ font-size:12px; color:#6b7280; }
+  .hint-ctrl{ font-size:11.5px; color:#9ca3af; }
+
+  .cta-line{ text-align:center; font-weight:800; margin-top:10px; color:var(--primary-text); }
+
+  .toolbar{ position:sticky; top:0; z-index:50; background:#111827; color:#fff; }
+  .tbtn{ padding:5px 11px; border-radius:8px; font-size:13px; cursor:pointer; border:1px solid #374151; background:transparent; color:#fff; }
+  .tbtn.on{ background:#1d7138; border-color:#1d7138; }
+
+  /* following (checkout) page */
+  #followingPage{ display:none; }
+  .pay-tab{ border:1px solid #cbd5e1; border-radius:8px; padding:8px 14px; font-size:14px; font-weight:600; cursor:pointer; background:#fff; }
+  .pay-tab.on{ border-color:var(--primary-background); color:var(--primary-text); background:var(--secondary-background); }
+</style>
+</head>
+<body>
+
+<div class="toolbar px-4 py-2 flex items-center gap-2 flex-wrap">
+  <span class="text-sm font-bold mr-1">#608 composer-first (message intent):</span>
+  <button class="tbtn on" id="t-empty" onclick="setStage('empty')">1 · Just arrived (empty)</button>
+  <button class="tbtn" id="t-typed" onclick="setStage('typed')">2 · Typed their own words</button>
+  <span class="text-xs text-gray-400 ml-auto">Send = the center (6-month) plan &rarr; next page. No canned pills (they chose &ldquo;Message,&rdquo; not &ldquo;Flirt&rdquo;).</span>
+</div>
+
+<!-- ============================ COMPOSER PAGE ============================ -->
+<div id="composerPage" class="[font-stretch:semi-expanded]">
+  <main class="flex items-start justify-center mt-4 mb-12 px-3">
+    <div class="w-full max-w-3xl mx-auto">
+
+      <div class="recipient-block rounded-xl p-3 sm:p-4 mb-3">
+        <div class="flex items-center gap-3 mb-3">
+          <img class="h-14 w-14 rounded-full object-cover border-2 border-white shadow"
+               src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces" alt="Olivia">
+          <div class="leading-tight">
+            <div class="font-bold text-lg text-primary-text">Send Olivia your message</div>
+            <div class="text-sm text-black/60">29 &middot; Bozeman, MT</div>
+          </div>
+        </div>
+
+        <!-- one-line composer + the familiar send button -->
+        <form onsubmit="return sendMessage(event)">
+          <div class="compose-row">
+            <div class="compose-shell">
+              <textarea id="composer" maxlength="2000" rows="1" class="compose-box"
+                placeholder="Write your first message to Olivia&hellip;" oninput="onInput()"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();sendMessage(event);}"></textarea>
+            </div>
+            <button type="button" class="emoji-btn" title="Emoji">&#128578;</button>
+            <!-- SAME round send button users know from every conversation -->
+            <button type="submit" id="sendBtn" class="send-btn muted" title="Send to Olivia" aria-label="Send">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg>
+            </button>
+          </div>
+          <div class="meta-row">
+            <span class="charcount">Characters left: <span id="left">2000</span></span>
+            <span class="hint-ctrl">Press Enter to send</span>
+          </div>
+        </form>
+
+        <div class="cta-line">Choose a plan and <span class="underline decoration-2 underline-offset-2">your message sends</span> to Olivia</div>
+      </div>
+
+      <div class="text-primary-text font-bold text-center mb-3 text-xl sm:text-2xl">
+        <p>Hurry! This introductory discount will expire soon.</p>
+      </div>
+
+      <!-- ===================== DESKTOP plan cards ===================== -->
+      <div class="pc-only mb-0">
+        <ul class="flex flex-row justify-center items-stretch">
+          <li class="min-w-64 text-white text-center popup-animate bg-m1 rounded-l-xl" onclick="goToCheckout('1-Month','$29.95')">
+            <div class="w-full">
+              <div class="text-xl font-bold border border-t-0 border-m1 bg-m1 w-full flex flex-col items-center justify-center rounded-tl-xl h-[150px] pt-4"><div><div class="uppercase">1 Month</div><div class="uppercase font-light">membership</div></div></div>
+              <div class="flex flex-col items-center justify-center">
+                <div class="text-2xl font-bold my-2">$29.95<span class="text-base font-normal"> / month</span></div>
+                <div class="flex justify-center items-center mb-4"><span class="flex gap-1 text-primary-text items-center bg-white rounded-full shadow-lg px-3 py-1">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg>
+                  <span class="cta-label">Upgrade</span></span></div>
+              </div></div>
+          </li>
+          <li class="min-w-64 text-white text-center popup-animate bg-m6 rounded-lg relative -mt-2 z-10" onclick="goToCheckout('6-Month','$16.66')">
+            <div class="w-full">
+              <div class="relative h-0 flex justify-center w-full"><div class="absolute -top-5"><div class="bg-white text-green-700 text-xs font-extrabold rounded-full px-3 py-1 shadow">BEST DEAL &middot; SAVE 45%</div></div></div>
+              <div class="text-xl font-bold border border-t-0 border-m6 bg-m6 w-full flex flex-col items-center justify-center rounded-t-md h-[180px] pt-6"><div><div class="uppercase text-3xl">6 Month</div><div class="uppercase text-3xl">membership</div></div></div>
+              <div class="flex flex-col items-center justify-center">
+                <div class="text-2xl font-bold my-2">$16.66<span class="text-base font-normal"> / month</span></div>
+                <div class="flex justify-center items-center mb-4"><span class="flex gap-1 text-primary-text items-center bg-white rounded-full shadow-lg px-3 py-1">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg>
+                  <span class="cta-label">Upgrade</span></span></div>
+              </div></div>
+          </li>
+          <li class="min-w-64 text-white text-center popup-animate bg-m3 rounded-r-xl" onclick="goToCheckout('3-Month','$20.00')">
+            <div class="w-full">
+              <div class="relative h-0 flex justify-center w-full"><div class="absolute -top-5"><div class="bg-white text-orange-500 text-xs font-extrabold rounded-full px-3 py-1 shadow">POPULAR CHOICE</div></div></div>
+              <div class="text-xl font-bold border border-t-0 border-m3 bg-m3 w-full flex flex-col items-center justify-center rounded-tr-xl h-[150px] pt-4"><div class="mb-3"><div class="uppercase">3 Month</div><div class="uppercase font-light">membership</div></div></div>
+              <div class="flex flex-col items-center justify-center">
+                <div class="text-2xl font-bold my-2">$20.00<span class="text-base font-normal"> / month</span></div>
+                <div class="flex justify-center items-center mb-4"><span class="flex gap-1 text-primary-text items-center bg-white rounded-full shadow-lg px-3 py-1">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg>
+                  <span class="cta-label">Upgrade</span></span></div>
+              </div></div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ===================== MOBILE plan cards ===================== -->
+      <div class="mobile-only w-full max-w-[22rem] mx-auto mt-2 mb-2">
+        <div class="flex flex-col items-stretch gap-5">
+          <div class="w-full bg-m6 text-white text-center rounded-xl popup-animate" onclick="goToCheckout('6-Month','$16.66')"><div class="w-full">
+            <div class="relative h-0 flex justify-center w-full"><div class="absolute -top-3"><div class="bg-white text-green-700 text-xs font-extrabold rounded-full px-3 py-1 shadow">BEST DEAL &middot; SAVE 45%</div></div></div>
+            <div class="text-xl font-bold border border-t-0 border-m6 bg-m6 w-full flex flex-col items-center justify-center rounded-t-xl h-[150px] pt-6"><div><div class="uppercase text-2xl">6 Month</div><div class="uppercase">membership</div></div></div>
+            <div class="flex flex-col items-center justify-center"><div class="text-2xl font-bold my-2">$16.66<span class="text-base font-normal"> / month</span></div>
+              <div class="flex justify-center items-center mb-4"><span class="flex gap-1 text-primary-text items-center bg-white rounded-full shadow-lg px-3 py-1"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg><span class="cta-label">Upgrade</span></span></div>
+            </div></div></div>
+          <div class="w-full bg-m1 text-white text-center rounded-xl popup-animate" onclick="goToCheckout('1-Month','$29.95')"><div class="w-full">
+            <div class="text-xl font-bold border border-t-0 border-m1 bg-m1 w-full flex flex-col items-center justify-center rounded-t-xl h-[140px] pt-4"><div><div class="uppercase">1 Month</div><div class="uppercase font-light">membership</div></div></div>
+            <div class="flex flex-col items-center justify-center"><div class="text-2xl font-bold my-2">$29.95<span class="text-base font-normal"> / month</span></div>
+              <div class="flex justify-center items-center mb-4"><span class="flex gap-1 text-primary-text items-center bg-white rounded-full shadow-lg px-3 py-1"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg><span class="cta-label">Upgrade</span></span></div>
+            </div></div></div>
+          <div class="w-full bg-m3 text-white text-center rounded-xl popup-animate" onclick="goToCheckout('3-Month','$20.00')"><div class="w-full">
+            <div class="relative h-0 flex justify-center w-full"><div class="absolute -top-3"><div class="bg-white text-orange-500 text-xs font-extrabold rounded-full px-3 py-1 shadow">POPULAR CHOICE</div></div></div>
+            <div class="text-xl font-bold border border-t-0 border-m3 bg-m3 w-full flex flex-col items-center justify-center rounded-t-xl h-[140px] pt-6"><div><div class="uppercase">3 Month</div><div class="uppercase font-light">membership</div></div></div>
+            <div class="flex flex-col items-center justify-center"><div class="text-2xl font-bold my-2">$20.00<span class="text-base font-normal"> / month</span></div>
+              <div class="flex justify-center items-center mb-4"><span class="flex gap-1 text-primary-text items-center bg-white rounded-full shadow-lg px-3 py-1"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg><span class="cta-label">Upgrade</span></span></div>
+            </div></div></div>
+        </div>
+      </div>
+
+      <div class="rounded-xl border border-primary-border p-3 sm:p-4 max-w-3xl mx-auto mt-4">
+        <div class="font-bold text-center text-lg sm:text-xl mb-2">Benefits of upgrading now:</div>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2 text-black">
+          <li>&#10003; Send &amp; receive unlimited messages</li>
+          <li>&#10003; See other members&rsquo; status</li>
+          <li>&#10003; Advanced search filtering</li>
+          <li>&#10003; See your visitors, likes &amp; matches</li>
+          <li>&#10003; Post unlimited photos</li>
+          <li>&#10003; Unlock all premium features</li>
+        </ul>
+      </div>
+      <div class="text-center text-sm text-black/60 mt-3 mb-2">Cancel anytime &middot; &#128274; Secure checkout</div>
+    </div>
+  </main>
+</div>
+
+<!-- ============================ FOLLOWING (CHECKOUT) PAGE ============================ -->
+<div id="followingPage">
+  <main class="flex items-start justify-center mt-6 mb-12 px-3">
+    <div class="w-full max-w-lg mx-auto">
+      <button onclick="backToComposer()" class="text-primary-text font-semibold text-sm mb-3">&larr; Back</button>
+
+      <div class="rounded-xl border border-primary-border p-4">
+        <div class="text-xl font-bold text-primary-text text-center">Almost there &mdash; <span id="planName">6-Month</span> Membership</div>
+        <div class="text-center text-2xl font-extrabold mt-1"><span id="planPrice">$16.66</span><span class="text-base font-normal text-black/60"> / month</span></div>
+
+        <div class="rounded-lg bg-secondary-background border border-primary-border p-3 mt-4 text-sm text-primary-text font-semibold flex items-start gap-2">
+          <span>&#10003;</span>
+          <span>Your message to <b>Olivia</b> sends the moment your upgrade completes:<br>
+            <span class="font-normal italic text-black/70" id="msgEcho">&ldquo;&hellip;&rdquo;</span></span>
+        </div>
+
+        <div class="mt-4">
+          <div class="font-semibold text-sm mb-2">Payment method</div>
+          <div class="flex gap-2">
+            <button class="pay-tab on">Credit card</button>
+            <button class="pay-tab">PayPal</button>
+          </div>
+          <div class="mt-3 grid grid-cols-1 gap-2">
+            <input class="border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Card number" disabled>
+            <div class="flex gap-2">
+              <input class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-1/2" placeholder="MM / YY" disabled>
+              <input class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-1/2" placeholder="CVC" disabled>
+            </div>
+          </div>
+        </div>
+
+        <button class="w-full mt-4 bg-primary-background text-white font-bold rounded-full py-3 flex items-center justify-center gap-2">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/></svg>
+          Complete upgrade &amp; send
+        </button>
+        <div class="text-center text-xs text-black/50 mt-2">Cancel anytime &middot; &#128274; Secure checkout</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  var composer = document.getElementById('composer');
+  var sendBtn  = document.getElementById('sendBtn');
+
+  function onInput(){
+    var n = composer.value.length;
+    document.getElementById('left').textContent = (2000 - n);
+    var has = composer.value.trim().length > 0;
+    sendBtn.classList.toggle('muted', !has);
+    document.querySelectorAll('.cta-label').forEach(function(el){ el.textContent = has ? 'Upgrade & Send' : 'Upgrade'; });
+  }
+
+  // Send = same as choosing the CENTER (6-month) plan → go to the following page.
+  function sendMessage(e){
+    if (e) e.preventDefault();
+    if (!composer.value.trim()){ composer.focus(); return false; }
+    goToCheckout('6-Month', '$16.66');
+    return false;
+  }
+
+  function goToCheckout(plan, price){
+    document.getElementById('planName').textContent = plan;
+    document.getElementById('planPrice').textContent = price;
+    var msg = composer.value.trim();
+    document.getElementById('msgEcho').textContent = msg ? ('“' + msg + '”') : '“…”';
+    document.getElementById('composerPage').style.display = 'none';
+    document.getElementById('followingPage').style.display = 'block';
+    window.scrollTo(0,0);
+  }
+  function backToComposer(){
+    document.getElementById('followingPage').style.display = 'none';
+    document.getElementById('composerPage').style.display = 'block';
+  }
+
+  function setStage(s){
+    document.getElementById('t-empty').classList.toggle('on', s==='empty');
+    document.getElementById('t-typed').classList.toggle('on', s==='typed');
+    composer.value = (s==='typed') ? "Hi Olivia! Do you ride the trails much this time of year?" : "";
+    onInput();
+  }
+  onInput();
+</script>
+</body>
+</html>
